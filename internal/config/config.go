@@ -118,7 +118,6 @@ func setDefaultValue() {
 		{"lat": 21.001944, "lon": 105.535222, "alt": 40},
 	})
 	viper.SetDefault("flight_containment.renotify_seconds", 60.0)
-	viper.SetDefault("flight_containment.lat_deviation_m", 10.0)
-	viper.SetDefault("flight_containment.lon_deviation_m", 10.0)
+	viper.SetDefault("flight_containment.horizontal_deviation_m", 10.0)
 	viper.SetDefault("flight_containment.alt_deviation_m", 5.0)
 }

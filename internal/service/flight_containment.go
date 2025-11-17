@@ -138,10 +138,8 @@ func (ms *MainService) CheckFlightContainment(droneLat, droneLon, droneAlt float
 	if len(settings.Waypoints) < 2 {
 		return false
 	}
-	latThreshold := settings.LatDeviationM
-	lonThreshold := settings.LonDeviationM
 	altThreshold := settings.AltDeviationM
-	horizontalThreshold := math.Max(latThreshold, lonThreshold)
+	horizontalThreshold := settings.HorizontalDeviationM
 	if horizontalThreshold <= 0 || altThreshold <= 0 {
 		return false
 	}
