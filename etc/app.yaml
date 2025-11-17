@@ -35,6 +35,21 @@ other:
   default_lang: "en"
   tracing_host: "localhost"
   tracing_port: 33333
+flight_containment:
+  radius: 5
+  waypoints:
+    - lat: 21.002694
+      lon: 105.537611
+      alt: 40
+    - lat: 21.001444
+      lon: 105.538111
+      alt: 40
+    - lat: 21.0005
+      lon: 105.535889
+      alt: 40
+    - lat: 21.001944
+      lon: 105.535222
+      alt: 40
 nats:
   server: "localhost:4222"
 jwt_token_config:

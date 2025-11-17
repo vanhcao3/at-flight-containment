@@ -92,41 +92,30 @@ func compute3DDeviation(drone Vec, path []Vec) float64 {
 }
 
 func (ms *MainService) CheckFlightContainment(droneLat, droneLon, droneAlt float64) bool {
-
-	radius := 5.0 // meters
-
-	// Intended waypoint coordinates in decimal degrees + altitude
-	waypoints := [][]float64{
-		{21.002694, 105.537611, 40.0}, // P1
-		{21.001444, 105.538111, 40.0}, // P2
-		{21.000500, 105.535889, 40.0}, // P3
-		{21.001944, 105.535222, 40.0}, // P4
-	}
-
-	// Reference point for ENU origin
-	refLat := waypoints[0][0]
-	refLon := waypoints[0][1]
-	refAlt := waypoints[0][2]
-
-	// Convert intended path to ENU (meters)
-	path := []Vec{}
-	for _, w := range waypoints {
-		e, n, u := latLonAltToENU(w[0], w[1], w[2], refLat, refLon, refAlt)
-		path = append(path, Vec{e, n, u})
-	}
-
-	de, dn, du := latLonAltToENU(droneLat, droneLon, droneAlt, refLat, refLon, refAlt)
-	drone := Vec{de, dn, du}
-
-	dev := compute3DDeviation(drone, path)
-
-	fmt.Printf("Drone deviation from path centerline: %.3f m\n", dev)
-
-	if dev > radius {
-		fmt.Println("WARNING: Drone is OUTSIDE cylindrical flight containment!")
-		return true
-	} else {
-		fmt.Println("Drone is inside containment corridor.")
+	if ms == nil || ms.SvcConfig == nil {
 		return false
 	}
+	settings := ms.SvcConfig.FlightContainment
+	if settings.Radius <= 0 || len(settings.Waypoints) < 2 {
+		return false
+	}
+	ref := settings.Waypoints[0]
+	path := make([]Vec, 0, len(settings.Waypoints))
+	for _, w := range settings.Waypoints {
+		e, n, u := latLonAltToENU(w.Latitude, w.Longitude, w.Altitude, ref.Latitude, ref.Longitude, ref.Altitude)
+		path = append(path, Vec{e, n, u})
+	}
+	if len(path) < 2 {
+		return false
+	}
+	de, dn, du := latLonAltToENU(droneLat, droneLon, droneAlt, ref.Latitude, ref.Longitude, ref.Altitude)
+	drone := Vec{de, dn, du}
+	dev := compute3DDeviation(drone, path)
+	fmt.Printf("Drone deviation from path centerline: %.3f m\n", dev)
+	if dev > settings.Radius {
+		fmt.Println("WARNING: Drone is OUTSIDE cylindrical flight containment!")
+		return true
+	}
+	fmt.Println("Drone is inside containment corridor.")
+	return false
 }
