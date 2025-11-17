@@ -181,17 +181,16 @@ func (ms *MainService) CheckFlightContainmentAll(ctx context.Context) error {
 		config.PrintErrorLog(ctx, err, "Failed to get all in_mem object tracks")
 		return err
 	}
-	infringedTracks := make(map[string]*pb.ObjectTrack)
+	infringedTracks := make(map[int32]*pb.ObjectTrack)
 	for _, track := range inMemObjectTracks {
 		if track == nil || track.Position == nil {
 			continue
 		}
 		if ms.CheckFlightContainment(float64(track.Position.Latitude), float64(track.Position.Longitude), float64(track.Position.Altitude)) {
-			key := track.ID
-			if key == "" {
-				key = fmt.Sprintf("%v", track.ObjectTrackID)
+			if track.ObjectTrackID == 0 {
+				continue
 			}
-			infringedTracks[key] = track
+			infringedTracks[track.ObjectTrackID] = track
 		}
 	}
 	if len(infringedTracks) == 0 {
