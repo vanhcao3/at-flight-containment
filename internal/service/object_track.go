@@ -203,6 +203,26 @@ func (ms *MainService) CheckFlightContainmentAll(ctx context.Context) error {
 	return nil
 }
 
+func (ms *MainService) StartFlightContainmentMonitor(ctx context.Context, interval time.Duration) {
+	if interval <= 0 {
+		interval = time.Second
+	}
+	go func() {
+		ticker := time.NewTicker(interval)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+				if err := ms.CheckFlightContainmentAll(ctx); err != nil && ctx.Err() == nil {
+					config.PrintErrorLog(ctx, err, "Flight containment monitor failed")
+				}
+			}
+		}
+	}()
+}
+
 type MobileDroneResponse struct {
 	ObjectID      string              `json:"drone_id"`
 	PolarVelocity pb.PolarVelocity    `json:"polar_velocity"`
