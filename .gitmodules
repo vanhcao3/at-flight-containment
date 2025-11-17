@@ -1,7 +1,0 @@
-[submodule "vendor"]
-	path = vendor
-	url = ../vendor
-	branch = master
-[submodule "pkg"]
-	path = pkg
-	url = ../pkg
