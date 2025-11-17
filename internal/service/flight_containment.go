@@ -141,7 +141,8 @@ func (ms *MainService) CheckFlightContainment(droneLat, droneLon, droneAlt float
 	latThreshold := settings.LatDeviationM
 	lonThreshold := settings.LonDeviationM
 	altThreshold := settings.AltDeviationM
-	if latThreshold <= 0 || lonThreshold <= 0 || altThreshold <= 0 {
+	horizontalThreshold := math.Max(latThreshold, lonThreshold)
+	if horizontalThreshold <= 0 || altThreshold <= 0 {
 		return false
 	}
 	ref := settings.Waypoints[0]
@@ -160,14 +161,13 @@ func (ms *MainService) CheckFlightContainment(droneLat, droneLon, droneAlt float
 		return false
 	}
 	offset := drone.Sub(closest)
-	lonDeviation := math.Abs(offset.x)
-	latDeviation := math.Abs(offset.y)
+	horizontalDeviation := math.Hypot(offset.x, offset.y)
 	altDeviation := math.Abs(offset.z)
 
-	fmt.Printf("Drone deviation from path centerline (lon: %.3f m, lat: %.3f m, alt: %.3f m)\n", lonDeviation, latDeviation, altDeviation)
+	fmt.Printf("Drone deviation from path centerline (horizontal: %.3f m, alt: %.3f m)\n", horizontalDeviation, altDeviation)
 
-	if lonDeviation > lonThreshold || latDeviation > latThreshold || altDeviation > altThreshold {
-		fmt.Println("WARNING: Drone is OUTSIDE cuboid flight containment!")
+	if horizontalDeviation > horizontalThreshold || altDeviation > altThreshold {
+		fmt.Println("WARNING: Drone is OUTSIDE flight containment cuboid!")
 		return true
 	}
 
