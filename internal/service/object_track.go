@@ -181,14 +181,27 @@ func (ms *MainService) CheckFlightContainmentAll(ctx context.Context) error {
 		config.PrintErrorLog(ctx, err, "Failed to get all in_mem object tracks")
 		return err
 	}
-	//Continously check flight containment, if find an infringment, .e.g. CheckFlightContainment return true, then Publish the track to websocket with event EventFlightContainmentInfringement NotificationEvent = "flight_containment.infringed"
-	for _, v := range inMemObjectTracks {
-		ms.CheckFlightContainment(float64(v.Position.Latitude), float64(v.Position.Longitude), float64(v.Position.Altitude))
-		//...
-		ms.Notifier().Publish()
+	infringedTracks := make(map[string]*pb.ObjectTrack)
+	for _, track := range inMemObjectTracks {
+		if track == nil || track.Position == nil {
+			continue
+		}
+		if ms.CheckFlightContainment(float64(track.Position.Latitude), float64(track.Position.Longitude), float64(track.Position.Altitude)) {
+			key := track.ID
+			if key == "" {
+				key = fmt.Sprintf("%v", track.ObjectTrackID)
+			}
+			infringedTracks[key] = track
+		}
 	}
-
-	return err
+	if len(infringedTracks) == 0 {
+		return nil
+	}
+	if err := ms.Notifier().Publish(EventFlightContainmentInfringement, infringedTracks); err != nil {
+		config.PrintErrorLog(ctx, err, "Failed to publish flight containment notification")
+		return err
+	}
+	return nil
 }
 
 type MobileDroneResponse struct {
