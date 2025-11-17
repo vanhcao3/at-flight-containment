@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package drone;
+
+option go_package = "pkg/pb";
+import "pkg/proto/SearchOptions.proto";
+import "pkg/proto/PatchOptions.proto";
+
+enum AT_UAV_OP_MODE {
+    AUOM_MODE_ONE = 0;
+ 
+}
+
+message Drone {
+    string  ID          = 1;//`json:"id" bson:"_id"`
+    string  RTSPLink      = 2;//`json:"rtsp_link" bson:"rtsp_link"`
+    string  GcsID        = 3;//`json:"gcs_id" bson:"gcs_id"`
+    AT_UAV_OP_MODE  Status      = 4;//`json:"Drone_status" bson:"Drone_status"`
+    string  DroneID     = 5;//`json:"drone_id" bson:"drone_id"`
+    FlightRoute FlightRoute  = 6;//`json:"flight_route" bson:"flight_route"`
+    uint64 Speed = 7;//`json:"speed" bson:"speed"`
+    uint64 Heading = 8;//`json:"heading" bson:"heading"`
+    uint64 Battery = 9;//`json:"battery" bson:"battery"`
+    uint64 CreatedAt = 10;//`json:"created_at" bson:"created_at"  audit:"createdAt"`
+    uint64 UpdatedAt = 11;//`json:"updated_at" bson:"updated_at"  audit:"updatedAt"`
+    string CreatedBy = 12;//`json:"created_by" bson:"created_by"`
+    string UpdatedBy = 13;//`json:"updated_by" bson:"updated_by"`
+}
+
+
+service DroneService {
+    rpc create (Drone) returns (Drone);
+    rpc search (search_options.SearchOptions) returns (SearchDroneResponse);
+    rpc patch (patch_options.PatchOptions) returns (patch_options.PatchResponse);
+}
+
+message SearchDroneResponse {
+    repeated Drone Drones = 1;//
+    int32 TotalCount =2;//
+}

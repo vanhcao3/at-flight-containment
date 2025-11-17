@@ -1,0 +1,7 @@
+/deb/
+/bin/
+/tmp/
+/data/
+/etc-dev/
+.idea
+.vscode

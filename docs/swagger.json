@@ -1,0 +1,1372 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "This is a sample Go Template server.",
+        "title": "Swagger Go Template Project API",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "name": "API Support",
+            "url": "http://www.swagger.io/support",
+            "email": "support@swagger.io"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "1.0"
+    },
+    "paths": {
+        "/drones": {
+            "get": {
+                "description": "Find all drone",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "drones"
+                ],
+                "summary": "Find all drone",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/pb.Drone"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new drone",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "drones"
+                ],
+                "summary": "Create a drone",
+                "parameters": [
+                    {
+                        "description": "drone body",
+                        "name": "drone",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/pb.Drone"
+                        }
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "event api call flag",
+                        "name": "eventAPI",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/pb.Drone"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/drones/search": {
+            "get": {
+                "description": "Search drone use Query option https://github.com/jtlabsio/mongo/",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "drones"
+                ],
+                "summary": "Search drone",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "page number",
+                        "name": "page[page]",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "page size",
+                        "name": "page[size]",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/pb.Drone"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/drones/{id}": {
+            "get": {
+                "description": "Find drone by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "drones"
+                ],
+                "summary": "Find drone by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "drone id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/pb.Drone"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update drone by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "drones"
+                ],
+                "summary": "Update drone by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "drone id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "drone body",
+                        "name": "drone",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/pb.Drone"
+                        }
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "event api call flag",
+                        "name": "eventAPI",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/pb.Drone"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete drone by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "drones"
+                ],
+                "summary": "Delete drone by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "drone id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "event api call flag",
+                        "name": "eventAPI",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/pb.Drone"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "description": "Patch drone by ID use standard of JSON PATCH https://jsonpatch.com/",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "drones"
+                ],
+                "summary": "Patch drone by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "drone id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Patch operation format Array of Operation Add, Remove, Replace, Copy, Move, Test. Get example at https://jsonpatch.com/",
+                        "name": "drone",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/jsonpatch.Operation"
+                            }
+                        }
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "event api call flag",
+                        "name": "eventAPI",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/pb.PatchResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/mobile/drone/{id}": {
+            "get": {
+                "description": "Find object_track by drone ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "object_tracks"
+                ],
+                "summary": "Find object_track by drone ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "drone id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/pb.ObjectTrack"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/object_tracks": {
+            "get": {
+                "description": "Find all object_track",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "object_tracks"
+                ],
+                "summary": "Find all object_track",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/pb.ObjectTrack"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/object_tracks/{id}": {
+            "get": {
+                "description": "Find object_track by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "object_tracks"
+                ],
+                "summary": "Find object_track by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "object_track id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/pb.ObjectTrack"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/track_historys": {
+            "get": {
+                "description": "Find all track_history",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "track_historys"
+                ],
+                "summary": "Find all track_history",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/util.TrackHistoryByteAndJson"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new track_history",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "track_historys"
+                ],
+                "summary": "Create  track_history",
+                "parameters": [
+                    {
+                        "description": "track_history body",
+                        "name": "track_history",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/pb.TrackHistory"
+                        }
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "event api call flag",
+                        "name": "eventAPI",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "number",
+                        "description": "event api call flag",
+                        "name": "lat",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "number",
+                        "description": "event api call flag",
+                        "name": "lon",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "number",
+                        "description": "event api call flag",
+                        "name": "alt",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/util.TrackHistoryByteAndJson"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/track_historys/search": {
+            "get": {
+                "description": "Search track_history use Query option https://github.com/jtlabsio/mongo/",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "track_historys"
+                ],
+                "summary": "Search track_history",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "page number",
+                        "name": "page[page]",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "page size",
+                        "name": "page[size]",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/util.TrackHistoryByteAndJson"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/track_historys/{id}": {
+            "get": {
+                "description": "Find track_history by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "track_historys"
+                ],
+                "summary": "Find track_history by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "drone id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/util.TrackHistoryByteAndJson"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update track_history by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "track_historys"
+                ],
+                "summary": "Update track_history by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "track_history id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "track_history body",
+                        "name": "track_history",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/pb.TrackHistory"
+                        }
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "event api call flag",
+                        "name": "eventAPI",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/util.TrackHistoryByteAndJson"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete track_history by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "track_historys"
+                ],
+                "summary": "Delete track_history by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "track_history id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "event api call flag",
+                        "name": "eventAPI",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/util.TrackHistoryByteAndJson"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "description": "Patch track_history by ID use standard of JSON PATCH https://jsonpatch.com/",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "track_historys"
+                ],
+                "summary": "Patch track_history by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "track_history id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Patch operation format Array of Operation Add, Remove, Replace, Copy, Move, Test. Get example at https://jsonpatch.com/",
+                        "name": "drone",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/jsonpatch.Operation"
+                            }
+                        }
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "event api call flag",
+                        "name": "eventAPI",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/pb.PatchResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "jsonpatch.Operation": {
+            "type": "object",
+            "additionalProperties": {
+                "type": "array",
+                "items": {
+                    "type": "integer"
+                }
+            }
+        },
+        "pb.AT_DRONE_STATUS": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2
+            ],
+            "x-enum-varnames": [
+                "AT_DRONE_STATUS_ADS_UNKNOWN",
+                "AT_DRONE_STATUS_ADS_FLYING",
+                "AT_DRONE_STATUS_ADS_LANDED"
+            ]
+        },
+        "pb.AT_VALIDATE_STATUS": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2
+            ],
+            "x-enum-varnames": [
+                "AT_VALIDATE_STATUS_ADS_CREATED",
+                "AT_VALIDATE_STATUS_ADS_SENT",
+                "AT_VALIDATE_STATUS_ADS_APPROVED"
+            ]
+        },
+        "pb.ActiveMode": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2,
+                3
+            ],
+            "x-enum-comments": {
+                "ActiveMode_ACTIVE_MODE_ACTIVE": "Active target is considered as true target",
+                "ActiveMode_ACTIVE_MODE_INACTIVE": "Inactive target is no longer tracking by any radar (has no source)",
+                "ActiveMode_ACTIVE_MODE_POTENTIAL": "Potential target has big probability as a true target",
+                "ActiveMode_ACTIVE_MODE_TENTATIVE": "Tentative target has big probability as a false target"
+            },
+            "x-enum-varnames": [
+                "ActiveMode_ACTIVE_MODE_TENTATIVE",
+                "ActiveMode_ACTIVE_MODE_POTENTIAL",
+                "ActiveMode_ACTIVE_MODE_ACTIVE",
+                "ActiveMode_ACTIVE_MODE_INACTIVE"
+            ]
+        },
+        "pb.AircraftFriendFoeState": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5
+            ],
+            "x-enum-comments": {
+                "AircraftFriendFoeState_AIR_FRIEND_FOE_STATE_ALLY": "Quan su - ta",
+                "AircraftFriendFoeState_AIR_FRIEND_FOE_STATE_DOMESTIC": "Quoc noi",
+                "AircraftFriendFoeState_AIR_FRIEND_FOE_STATE_HOSTILE": "Dich",
+                "AircraftFriendFoeState_AIR_FRIEND_FOE_STATE_INTERNATIONAL": "Quoc te",
+                "AircraftFriendFoeState_AIR_FRIEND_FOE_STATE_OVERFLIGHT": "Qua canh",
+                "AircraftFriendFoeState_AIR_FRIEND_FOE_STATE_UNKNOWN": "KXD"
+            },
+            "x-enum-varnames": [
+                "AircraftFriendFoeState_AIR_FRIEND_FOE_STATE_UNKNOWN",
+                "AircraftFriendFoeState_AIR_FRIEND_FOE_STATE_DOMESTIC",
+                "AircraftFriendFoeState_AIR_FRIEND_FOE_STATE_HOSTILE",
+                "AircraftFriendFoeState_AIR_FRIEND_FOE_STATE_ALLY",
+                "AircraftFriendFoeState_AIR_FRIEND_FOE_STATE_INTERNATIONAL",
+                "AircraftFriendFoeState_AIR_FRIEND_FOE_STATE_OVERFLIGHT"
+            ]
+        },
+        "pb.AircraftInfo": {
+            "type": "object",
+            "properties": {
+                "aircraft_count": {
+                    "description": "Number of aircraft in one formation:\nIf aircraft in formation fly closely together, sensor with low resolution will see them as one target.\nThat's why we need this field to identify the real number of aircraft in one target.",
+                    "type": "integer"
+                },
+                "aircraft_type": {
+                    "description": "Refer to AircraftType in TrackInfoEnum.proto",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/pb.AircraftType"
+                        }
+                    ]
+                },
+                "mode_3a": {
+                    "description": "Mode 3/A of aircraft: a string of 4-digit",
+                    "type": "string"
+                },
+                "mode_s": {
+                    "description": "Mode S of aircraft: a string of 6 hex-code",
+                    "type": "string"
+                },
+                "special_label": {
+                    "description": "Aircraft of important flight (for example: flight of president), often be assigned a label so all operators can recognized it quickly",
+                    "type": "string"
+                }
+            }
+        },
+        "pb.AircraftType": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11,
+                12,
+                13,
+                14,
+                15,
+                16,
+                17,
+                18
+            ],
+            "x-enum-comments": {
+                "AircraftType_AIRCRAFT_TYPE_DRONE": "canh quat",
+                "AircraftType_AIRCRAFT_TYPE_FIXED_WING": "canh bang",
+                "AircraftType_AIRCRAFT_TYPE_UAV": "Neu chua xac dinh canh quat, canh bang"
+            },
+            "x-enum-varnames": [
+                "AircraftType_AIRCRAFT_TYPE_UNKNOWN",
+                "AircraftType_AIRCRAFT_TYPE_BOMBER",
+                "AircraftType_AIRCRAFT_TYPE_HELICOPTER",
+                "AircraftType_AIRCRAFT_TYPE_TRANSPORT",
+                "AircraftType_AIRCRAFT_TYPE_REFUEL",
+                "AircraftType_AIRCRAFT_TYPE_RECONNAISSANCE",
+                "AircraftType_AIRCRAFT_TYPE_ECM",
+                "AircraftType_AIRCRAFT_TYPE_AWACS",
+                "AircraftType_AIRCRAFT_TYPE_TRAINING",
+                "AircraftType_AIRCRAFT_TYPE_STRATEGIC_BOMBER",
+                "AircraftType_AIRCRAFT_TYPE_CRUISE_MISSILE",
+                "AircraftType_AIRCRAFT_TYPE_BALLISTIC_MISSILE",
+                "AircraftType_AIRCRAFT_TYPE_UAV",
+                "AircraftType_AIRCRAFT_TYPE_AEROSTAT",
+                "AircraftType_AIRCRAFT_TYPE_CIVIL",
+                "AircraftType_AIRCRAFT_TYPE_FIGHTER",
+                "AircraftType_AIRCRAFT_TYPE_DRONE",
+                "AircraftType_AIRCRAFT_TYPE_FIXED_WING",
+                "AircraftType_AIRCRAFT_TYPE_BOMB"
+            ]
+        },
+        "pb.Drone": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "integer"
+                },
+                "created_by": {
+                    "type": "string"
+                },
+                "deport_id": {
+                    "type": "string"
+                },
+                "drone_status": {
+                    "$ref": "#/definitions/pb.AT_DRONE_STATUS"
+                },
+                "fixed_locker_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "gcs_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "mass": {
+                    "type": "number"
+                },
+                "max_battery": {
+                    "type": "number"
+                },
+                "max_payload": {
+                    "type": "number"
+                },
+                "max_power": {
+                    "type": "number"
+                },
+                "max_speed": {
+                    "type": "number"
+                },
+                "rtsp_link": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
+                },
+                "updated_at": {
+                    "type": "integer"
+                },
+                "updated_by": {
+                    "type": "string"
+                },
+                "validate_status": {
+                    "$ref": "#/definitions/pb.AT_VALIDATE_STATUS"
+                }
+            }
+        },
+        "pb.GeodeticPosition": {
+            "type": "object",
+            "properties": {
+                "altitude": {
+                    "type": "number",
+                    "maximum": 99999,
+                    "minimum": 0
+                },
+                "latitude": {
+                    "type": "number",
+                    "maximum": 90,
+                    "minimum": -90
+                },
+                "longitude": {
+                    "type": "number",
+                    "maximum": 180,
+                    "minimum": -180
+                }
+            }
+        },
+        "pb.HeightSourceType": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2,
+                3
+            ],
+            "x-enum-varnames": [
+                "HeightSourceType_HEIGHT_SOURCE_TYPE_UNKNOWN",
+                "HeightSourceType_HEIGHT_SOURCE_TYPE_MILITARY",
+                "HeightSourceType_HEIGHT_SOURCE_TYPE_CIVIL",
+                "HeightSourceType_HEIGHT_SOURCE_TYPE_MANUAL"
+            ]
+        },
+        "pb.Location": {
+            "type": "object",
+            "properties": {
+                "geodetic_position": {
+                    "description": "string  ID          = 1;//`json:\"id,omitempty\" bson:\"_id\"`",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/pb.GeodeticPosition"
+                        }
+                    ]
+                }
+            }
+        },
+        "pb.ManeuverWarning": {
+            "type": "object",
+            "properties": {
+                "delta": {
+                    "type": "number"
+                },
+                "delta_percent": {
+                    "description": "Value from 0 to 1, equal 0% to 100%",
+                    "type": "number"
+                },
+                "timestamp": {
+                    "description": "Timestamp when the warning occur",
+                    "type": "integer"
+                },
+                "type": {
+                    "description": "1 = SPEED; 2 = HEADING; 3 = ALTITUDE",
+                    "type": "integer"
+                }
+            }
+        },
+        "pb.ObjectTrack": {
+            "type": "object",
+            "properties": {
+                "aircraft_type": {
+                    "$ref": "#/definitions/pb.AircraftType"
+                },
+                "battery": {
+                    "type": "number"
+                },
+                "created_at": {
+                    "type": "integer"
+                },
+                "created_by": {
+                    "type": "string"
+                },
+                "datasource_latest_update": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "integer"
+                    }
+                },
+                "drone_status": {
+                    "$ref": "#/definitions/pb.AT_DRONE_STATUS"
+                },
+                "heading": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "object_id": {
+                    "type": "string"
+                },
+                "object_track_id": {
+                    "type": "integer"
+                },
+                "polar_velocity": {
+                    "$ref": "#/definitions/pb.PolarVelocity"
+                },
+                "position": {
+                    "$ref": "#/definitions/pb.GeodeticPosition"
+                },
+                "remain_time": {
+                    "type": "integer"
+                },
+                "source_tracks": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/pb.TrackMessage"
+                    }
+                },
+                "updated_at": {
+                    "type": "integer"
+                },
+                "updated_by": {
+                    "type": "string"
+                }
+            }
+        },
+        "pb.PatchResponse": {
+            "type": "object",
+            "properties": {
+                "IsOk": {
+                    "type": "boolean"
+                },
+                "Message": {
+                    "type": "string"
+                }
+            }
+        },
+        "pb.PolarPosition": {
+            "type": "object",
+            "properties": {
+                "azimuth": {
+                    "description": "radian",
+                    "type": "number"
+                },
+                "elevation": {
+                    "description": "meter",
+                    "type": "number"
+                },
+                "range": {
+                    "description": "meter",
+                    "type": "number"
+                }
+            }
+        },
+        "pb.PolarVelocity": {
+            "type": "object",
+            "properties": {
+                "heading": {
+                    "description": "radian",
+                    "type": "number"
+                },
+                "speed": {
+                    "description": "m/s",
+                    "type": "number"
+                }
+            }
+        },
+        "pb.SourceInfo": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "source_type": {
+                    "description": "Refer to SourceType in TrackInfoEnum.proto",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/pb.SourceType"
+                        }
+                    ]
+                }
+            }
+        },
+        "pb.SourceType": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2,
+                3,
+                100
+            ],
+            "x-enum-comments": {
+                "SourceType_SOURCE_TYPE_CAM": "camera - QDT",
+                "SourceType_SOURCE_TYPE_EW": "electronic warfare - TCDT"
+            },
+            "x-enum-varnames": [
+                "SourceType_SOURCE_TYPE_UNKNOWN",
+                "SourceType_SOURCE_TYPE_RADAR",
+                "SourceType_SOURCE_TYPE_EW",
+                "SourceType_SOURCE_TYPE_CAM",
+                "SourceType_SOURCE_TYPE_EXTERNAL_VQ"
+            ]
+        },
+        "pb.TrackHistory": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "integer"
+                },
+                "datasource": {
+                    "type": "string"
+                },
+                "drone_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "location_byte": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "order_id": {
+                    "type": "string"
+                },
+                "track_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "pb.TrackInfo": {
+            "type": "object",
+            "properties": {
+                "aircraft_info": {
+                    "$ref": "#/definitions/pb.AircraftInfo"
+                },
+                "call_sign": {
+                    "type": "string"
+                },
+                "friend_foe_state": {
+                    "$ref": "#/definitions/pb.AircraftFriendFoeState"
+                },
+                "height_source_type": {
+                    "description": "Refer to HeightSourceType in TrackInfoEnum.proto",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/pb.HeightSourceType"
+                        }
+                    ]
+                },
+                "maneuver_status": {
+                    "description": "todo dinh nghia\nEnum value\n0 = UNKNOWN;\n1 = NORMAL\n2 = LOST_CONTROL; 3 = LOST_ALTITUDE; 4 = LOST_CONTROL_AND_ALTITUDE;",
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "track_quality": {
+                    "description": "Additional info for TN24 military drill",
+                    "type": "integer"
+                }
+            }
+        },
+        "pb.TrackMessage": {
+            "type": "object",
+            "properties": {
+                "active_mode": {
+                    "description": "Refer to ActiveMode in TrackInfoEnum.proto",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/pb.ActiveMode"
+                        }
+                    ]
+                },
+                "confirmed": {
+                    "type": "boolean"
+                },
+                "created_timestamp": {
+                    "description": "Timestamp when track is created",
+                    "type": "integer"
+                },
+                "destroyed": {
+                    "type": "boolean"
+                },
+                "geodetic_position": {
+                    "$ref": "#/definitions/pb.GeodeticPosition"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "jammed": {
+                    "type": "boolean"
+                },
+                "last_updated_timestamp": {
+                    "description": "Timestamp when track is updated by a source track",
+                    "type": "integer"
+                },
+                "maneuver_warnings": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/pb.ManeuverWarning"
+                    }
+                },
+                "no_delete_flag": {
+                    "description": "Additional fields",
+                    "type": "boolean"
+                },
+                "polar_position": {
+                    "$ref": "#/definitions/pb.PolarPosition"
+                },
+                "polar_velocity": {
+                    "$ref": "#/definitions/pb.PolarVelocity"
+                },
+                "source_info": {
+                    "$ref": "#/definitions/pb.SourceInfo"
+                },
+                "source_tracks": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/pb.TrackMessage"
+                    }
+                },
+                "suppressed": {
+                    "type": "boolean"
+                },
+                "timestamp": {
+                    "description": "Timestamp when track's kinematic state (position + velocity) is updated (by a source track or by prediction)",
+                    "type": "integer"
+                },
+                "track_info": {
+                    "$ref": "#/definitions/pb.TrackInfo"
+                },
+                "tracking_mode": {
+                    "description": "Refer to TrackingMode in TrackInfoEnum.proto",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/pb.TrackingMode"
+                        }
+                    ]
+                }
+            }
+        },
+        "pb.TrackingMode": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2
+            ],
+            "x-enum-varnames": [
+                "TrackingMode_TRACKING_MODE_AUTOMATIC",
+                "TrackingMode_TRACKING_MODE_SEMI_AUTO",
+                "TrackingMode_TRACKING_MODE_MANUAL"
+            ]
+        },
+        "types.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "example": 400
+                },
+                "message": {
+                    "type": "string",
+                    "example": "status bad request"
+                }
+            }
+        },
+        "util.TrackHistoryByteAndJson": {
+            "type": "object",
+            "properties": {
+                "location_json": {
+                    "$ref": "#/definitions/pb.Location"
+                },
+                "track_history": {
+                    "$ref": "#/definitions/pb.TrackHistory"
+                }
+            }
+        }
+    }
+}

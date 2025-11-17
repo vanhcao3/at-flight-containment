@@ -1,0 +1,41 @@
+stages:
+  - build
+  - test
+  - package
+  - deploy
+
+# compile:
+#   stage: build
+#   image: registry.c4i.vn/c4i/golang:1.24.0-bookworm
+#   tags:
+#     - builder
+#   variables:
+#     GIT_SUBMODULE_STRATEGY: recursive
+#   script:
+#     - make go-build
+
+debian-pack:
+  stage: package
+  image: registry.c4i.vn/c4i/golang:1.24.0-bookworm
+  tags:
+    - deployer
+  variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+    DATA_DIR: "/storage/tile-server-data"
+    STYLE_TIMEOUT: "1080000"
+    MAX_STYLE_CONCURRENCY: "16"
+  script:
+    - make release-debian
+  when: manual
+
+image-pack:
+  stage: package
+  tags:
+    - deployer
+  variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+    DOCKER_USER: admin
+    DOCKER_PASSWORD: Chdk@2019
+  script:
+    - make release-docker-image
+  when: always

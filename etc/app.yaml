@@ -1,0 +1,41 @@
+mongo:
+  host: "localhost"
+  port: 27017
+  name: "at-drone"
+  replica: ""
+  user: ""
+  pass: ""
+rabbitmq:
+  host: "localhost"
+  port: 5672
+http:
+  port: 33280
+  enable_recover_middleware: true
+  enable_cors_middleware: true
+  endpoints:
+    at-order: "http://localhost:33180"
+    at-drone: "http://localhost:33280"
+    at-command: "http://localhost:33380"
+    at-locker: "http://localhost:33480"
+    at-user: "http://localhost:33580"
+    at-gcs: "http://localhost:33680"
+    at-event-listener: "http://localhost:33980"
+grpc:
+  port: 33265
+  channels:
+     at-order: "localhost:33165"
+     at-drone: "localhost:33265"
+     at-command: "localhost:33365"
+     at-locker: "localhost:33465"
+     at-user: "localhost:33565"
+     at-gcs: "localhost:33665"
+     at-event-listener: "localhost:33965"
+other:
+  environment: "development"
+  default_lang: "en"
+  tracing_host: "localhost"
+  tracing_port: 33333
+nats:
+  server: "localhost:4222"
+jwt_token_config:
+  validate_jwt: false

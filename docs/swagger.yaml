@@ -1,0 +1,956 @@
+definitions:
+  jsonpatch.Operation:
+    additionalProperties:
+      items:
+        type: integer
+      type: array
+    type: object
+  pb.AT_DRONE_STATUS:
+    enum:
+    - 0
+    - 1
+    - 2
+    type: integer
+    x-enum-varnames:
+    - AT_DRONE_STATUS_ADS_UNKNOWN
+    - AT_DRONE_STATUS_ADS_FLYING
+    - AT_DRONE_STATUS_ADS_LANDED
+  pb.AT_VALIDATE_STATUS:
+    enum:
+    - 0
+    - 1
+    - 2
+    type: integer
+    x-enum-varnames:
+    - AT_VALIDATE_STATUS_ADS_CREATED
+    - AT_VALIDATE_STATUS_ADS_SENT
+    - AT_VALIDATE_STATUS_ADS_APPROVED
+  pb.ActiveMode:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    type: integer
+    x-enum-comments:
+      ActiveMode_ACTIVE_MODE_ACTIVE: Active target is considered as true target
+      ActiveMode_ACTIVE_MODE_INACTIVE: Inactive target is no longer tracking by any
+        radar (has no source)
+      ActiveMode_ACTIVE_MODE_POTENTIAL: Potential target has big probability as a
+        true target
+      ActiveMode_ACTIVE_MODE_TENTATIVE: Tentative target has big probability as a
+        false target
+    x-enum-varnames:
+    - ActiveMode_ACTIVE_MODE_TENTATIVE
+    - ActiveMode_ACTIVE_MODE_POTENTIAL
+    - ActiveMode_ACTIVE_MODE_ACTIVE
+    - ActiveMode_ACTIVE_MODE_INACTIVE
+  pb.AircraftFriendFoeState:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    type: integer
+    x-enum-comments:
+      AircraftFriendFoeState_AIR_FRIEND_FOE_STATE_ALLY: Quan su - ta
+      AircraftFriendFoeState_AIR_FRIEND_FOE_STATE_DOMESTIC: Quoc noi
+      AircraftFriendFoeState_AIR_FRIEND_FOE_STATE_HOSTILE: Dich
+      AircraftFriendFoeState_AIR_FRIEND_FOE_STATE_INTERNATIONAL: Quoc te
+      AircraftFriendFoeState_AIR_FRIEND_FOE_STATE_OVERFLIGHT: Qua canh
+      AircraftFriendFoeState_AIR_FRIEND_FOE_STATE_UNKNOWN: KXD
+    x-enum-varnames:
+    - AircraftFriendFoeState_AIR_FRIEND_FOE_STATE_UNKNOWN
+    - AircraftFriendFoeState_AIR_FRIEND_FOE_STATE_DOMESTIC
+    - AircraftFriendFoeState_AIR_FRIEND_FOE_STATE_HOSTILE
+    - AircraftFriendFoeState_AIR_FRIEND_FOE_STATE_ALLY
+    - AircraftFriendFoeState_AIR_FRIEND_FOE_STATE_INTERNATIONAL
+    - AircraftFriendFoeState_AIR_FRIEND_FOE_STATE_OVERFLIGHT
+  pb.AircraftInfo:
+    properties:
+      aircraft_count:
+        description: |-
+          Number of aircraft in one formation:
+          If aircraft in formation fly closely together, sensor with low resolution will see them as one target.
+          That's why we need this field to identify the real number of aircraft in one target.
+        type: integer
+      aircraft_type:
+        allOf:
+        - $ref: '#/definitions/pb.AircraftType'
+        description: Refer to AircraftType in TrackInfoEnum.proto
+      mode_3a:
+        description: 'Mode 3/A of aircraft: a string of 4-digit'
+        type: string
+      mode_s:
+        description: 'Mode S of aircraft: a string of 6 hex-code'
+        type: string
+      special_label:
+        description: 'Aircraft of important flight (for example: flight of president),
+          often be assigned a label so all operators can recognized it quickly'
+        type: string
+    type: object
+  pb.AircraftType:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    - 9
+    - 10
+    - 11
+    - 12
+    - 13
+    - 14
+    - 15
+    - 16
+    - 17
+    - 18
+    type: integer
+    x-enum-comments:
+      AircraftType_AIRCRAFT_TYPE_DRONE: canh quat
+      AircraftType_AIRCRAFT_TYPE_FIXED_WING: canh bang
+      AircraftType_AIRCRAFT_TYPE_UAV: Neu chua xac dinh canh quat, canh bang
+    x-enum-varnames:
+    - AircraftType_AIRCRAFT_TYPE_UNKNOWN
+    - AircraftType_AIRCRAFT_TYPE_BOMBER
+    - AircraftType_AIRCRAFT_TYPE_HELICOPTER
+    - AircraftType_AIRCRAFT_TYPE_TRANSPORT
+    - AircraftType_AIRCRAFT_TYPE_REFUEL
+    - AircraftType_AIRCRAFT_TYPE_RECONNAISSANCE
+    - AircraftType_AIRCRAFT_TYPE_ECM
+    - AircraftType_AIRCRAFT_TYPE_AWACS
+    - AircraftType_AIRCRAFT_TYPE_TRAINING
+    - AircraftType_AIRCRAFT_TYPE_STRATEGIC_BOMBER
+    - AircraftType_AIRCRAFT_TYPE_CRUISE_MISSILE
+    - AircraftType_AIRCRAFT_TYPE_BALLISTIC_MISSILE
+    - AircraftType_AIRCRAFT_TYPE_UAV
+    - AircraftType_AIRCRAFT_TYPE_AEROSTAT
+    - AircraftType_AIRCRAFT_TYPE_CIVIL
+    - AircraftType_AIRCRAFT_TYPE_FIGHTER
+    - AircraftType_AIRCRAFT_TYPE_DRONE
+    - AircraftType_AIRCRAFT_TYPE_FIXED_WING
+    - AircraftType_AIRCRAFT_TYPE_BOMB
+  pb.Drone:
+    properties:
+      created_at:
+        type: integer
+      created_by:
+        type: string
+      deport_id:
+        type: string
+      drone_status:
+        $ref: '#/definitions/pb.AT_DRONE_STATUS'
+      fixed_locker_ids:
+        items:
+          type: string
+        type: array
+      gcs_id:
+        type: string
+      id:
+        type: string
+      image:
+        type: string
+      mass:
+        type: number
+      max_battery:
+        type: number
+      max_payload:
+        type: number
+      max_power:
+        type: number
+      max_speed:
+        type: number
+      rtsp_link:
+        type: string
+      size:
+        items:
+          type: number
+        type: array
+      updated_at:
+        type: integer
+      updated_by:
+        type: string
+      validate_status:
+        $ref: '#/definitions/pb.AT_VALIDATE_STATUS'
+    type: object
+  pb.GeodeticPosition:
+    properties:
+      altitude:
+        maximum: 99999
+        minimum: 0
+        type: number
+      latitude:
+        maximum: 90
+        minimum: -90
+        type: number
+      longitude:
+        maximum: 180
+        minimum: -180
+        type: number
+    type: object
+  pb.HeightSourceType:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    type: integer
+    x-enum-varnames:
+    - HeightSourceType_HEIGHT_SOURCE_TYPE_UNKNOWN
+    - HeightSourceType_HEIGHT_SOURCE_TYPE_MILITARY
+    - HeightSourceType_HEIGHT_SOURCE_TYPE_CIVIL
+    - HeightSourceType_HEIGHT_SOURCE_TYPE_MANUAL
+  pb.Location:
+    properties:
+      geodetic_position:
+        allOf:
+        - $ref: '#/definitions/pb.GeodeticPosition'
+        description: string  ID          = 1;//`json:"id,omitempty" bson:"_id"`
+    type: object
+  pb.ManeuverWarning:
+    properties:
+      delta:
+        type: number
+      delta_percent:
+        description: Value from 0 to 1, equal 0% to 100%
+        type: number
+      timestamp:
+        description: Timestamp when the warning occur
+        type: integer
+      type:
+        description: 1 = SPEED; 2 = HEADING; 3 = ALTITUDE
+        type: integer
+    type: object
+  pb.ObjectTrack:
+    properties:
+      aircraft_type:
+        $ref: '#/definitions/pb.AircraftType'
+      battery:
+        type: number
+      created_at:
+        type: integer
+      created_by:
+        type: string
+      datasource_latest_update:
+        additionalProperties:
+          type: integer
+        type: object
+      drone_status:
+        $ref: '#/definitions/pb.AT_DRONE_STATUS'
+      heading:
+        type: number
+      id:
+        type: string
+      object_id:
+        type: string
+      object_track_id:
+        type: integer
+      polar_velocity:
+        $ref: '#/definitions/pb.PolarVelocity'
+      position:
+        $ref: '#/definitions/pb.GeodeticPosition'
+      remain_time:
+        type: integer
+      source_tracks:
+        items:
+          $ref: '#/definitions/pb.TrackMessage'
+        type: array
+      updated_at:
+        type: integer
+      updated_by:
+        type: string
+    type: object
+  pb.PatchResponse:
+    properties:
+      IsOk:
+        type: boolean
+      Message:
+        type: string
+    type: object
+  pb.PolarPosition:
+    properties:
+      azimuth:
+        description: radian
+        type: number
+      elevation:
+        description: meter
+        type: number
+      range:
+        description: meter
+        type: number
+    type: object
+  pb.PolarVelocity:
+    properties:
+      heading:
+        description: radian
+        type: number
+      speed:
+        description: m/s
+        type: number
+    type: object
+  pb.SourceInfo:
+    properties:
+      id:
+        type: string
+      source_type:
+        allOf:
+        - $ref: '#/definitions/pb.SourceType'
+        description: Refer to SourceType in TrackInfoEnum.proto
+    type: object
+  pb.SourceType:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 100
+    type: integer
+    x-enum-comments:
+      SourceType_SOURCE_TYPE_CAM: camera - QDT
+      SourceType_SOURCE_TYPE_EW: electronic warfare - TCDT
+    x-enum-varnames:
+    - SourceType_SOURCE_TYPE_UNKNOWN
+    - SourceType_SOURCE_TYPE_RADAR
+    - SourceType_SOURCE_TYPE_EW
+    - SourceType_SOURCE_TYPE_CAM
+    - SourceType_SOURCE_TYPE_EXTERNAL_VQ
+  pb.TrackHistory:
+    properties:
+      created_at:
+        type: integer
+      datasource:
+        type: string
+      drone_id:
+        type: string
+      id:
+        type: string
+      location_byte:
+        items:
+          type: integer
+        type: array
+      order_id:
+        type: string
+      track_id:
+        type: integer
+    type: object
+  pb.TrackInfo:
+    properties:
+      aircraft_info:
+        $ref: '#/definitions/pb.AircraftInfo'
+      call_sign:
+        type: string
+      friend_foe_state:
+        $ref: '#/definitions/pb.AircraftFriendFoeState'
+      height_source_type:
+        allOf:
+        - $ref: '#/definitions/pb.HeightSourceType'
+        description: Refer to HeightSourceType in TrackInfoEnum.proto
+      maneuver_status:
+        description: |-
+          todo dinh nghia
+          Enum value
+          0 = UNKNOWN;
+          1 = NORMAL
+          2 = LOST_CONTROL; 3 = LOST_ALTITUDE; 4 = LOST_CONTROL_AND_ALTITUDE;
+        type: integer
+      name:
+        type: string
+      track_quality:
+        description: Additional info for TN24 military drill
+        type: integer
+    type: object
+  pb.TrackMessage:
+    properties:
+      active_mode:
+        allOf:
+        - $ref: '#/definitions/pb.ActiveMode'
+        description: Refer to ActiveMode in TrackInfoEnum.proto
+      confirmed:
+        type: boolean
+      created_timestamp:
+        description: Timestamp when track is created
+        type: integer
+      destroyed:
+        type: boolean
+      geodetic_position:
+        $ref: '#/definitions/pb.GeodeticPosition'
+      id:
+        type: integer
+      jammed:
+        type: boolean
+      last_updated_timestamp:
+        description: Timestamp when track is updated by a source track
+        type: integer
+      maneuver_warnings:
+        items:
+          $ref: '#/definitions/pb.ManeuverWarning'
+        type: array
+      no_delete_flag:
+        description: Additional fields
+        type: boolean
+      polar_position:
+        $ref: '#/definitions/pb.PolarPosition'
+      polar_velocity:
+        $ref: '#/definitions/pb.PolarVelocity'
+      source_info:
+        $ref: '#/definitions/pb.SourceInfo'
+      source_tracks:
+        items:
+          $ref: '#/definitions/pb.TrackMessage'
+        type: array
+      suppressed:
+        type: boolean
+      timestamp:
+        description: Timestamp when track's kinematic state (position + velocity)
+          is updated (by a source track or by prediction)
+        type: integer
+      track_info:
+        $ref: '#/definitions/pb.TrackInfo'
+      tracking_mode:
+        allOf:
+        - $ref: '#/definitions/pb.TrackingMode'
+        description: Refer to TrackingMode in TrackInfoEnum.proto
+    type: object
+  pb.TrackingMode:
+    enum:
+    - 0
+    - 1
+    - 2
+    type: integer
+    x-enum-varnames:
+    - TrackingMode_TRACKING_MODE_AUTOMATIC
+    - TrackingMode_TRACKING_MODE_SEMI_AUTO
+    - TrackingMode_TRACKING_MODE_MANUAL
+  types.ErrorResponse:
+    properties:
+      code:
+        example: 400
+        type: integer
+      message:
+        example: status bad request
+        type: string
+    type: object
+  util.TrackHistoryByteAndJson:
+    properties:
+      location_json:
+        $ref: '#/definitions/pb.Location'
+      track_history:
+        $ref: '#/definitions/pb.TrackHistory'
+    type: object
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This is a sample Go Template server.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Swagger Go Template Project API
+  version: "1.0"
+paths:
+  /drones:
+    get:
+      consumes:
+      - application/json
+      description: Find all drone
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pb.Drone'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Find all drone
+      tags:
+      - drones
+    post:
+      consumes:
+      - application/json
+      description: Create a new drone
+      parameters:
+      - description: drone body
+        in: body
+        name: drone
+        required: true
+        schema:
+          $ref: '#/definitions/pb.Drone'
+      - description: event api call flag
+        in: query
+        name: eventAPI
+        required: true
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pb.Drone'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Create a drone
+      tags:
+      - drones
+  /drones/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete drone by ID
+      parameters:
+      - description: drone id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: event api call flag
+        in: query
+        name: eventAPI
+        required: true
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pb.Drone'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Delete drone by ID
+      tags:
+      - drones
+    get:
+      consumes:
+      - application/json
+      description: Find drone by ID
+      parameters:
+      - description: drone id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pb.Drone'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Find drone by ID
+      tags:
+      - drones
+    patch:
+      consumes:
+      - application/json
+      description: Patch drone by ID use standard of JSON PATCH https://jsonpatch.com/
+      parameters:
+      - description: drone id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Patch operation format Array of Operation Add, Remove, Replace,
+          Copy, Move, Test. Get example at https://jsonpatch.com/
+        in: body
+        name: drone
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/jsonpatch.Operation'
+          type: array
+      - description: event api call flag
+        in: query
+        name: eventAPI
+        required: true
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pb.PatchResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Patch drone by ID
+      tags:
+      - drones
+    put:
+      consumes:
+      - application/json
+      description: Update drone by ID
+      parameters:
+      - description: drone id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: drone body
+        in: body
+        name: drone
+        required: true
+        schema:
+          $ref: '#/definitions/pb.Drone'
+      - description: event api call flag
+        in: query
+        name: eventAPI
+        required: true
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pb.Drone'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Update drone by ID
+      tags:
+      - drones
+  /drones/search:
+    get:
+      consumes:
+      - application/json
+      description: Search drone use Query option https://github.com/jtlabsio/mongo/
+      parameters:
+      - description: page number
+        in: query
+        name: page[page]
+        required: true
+        type: integer
+      - description: page size
+        in: query
+        name: page[size]
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pb.Drone'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Search drone
+      tags:
+      - drones
+  /mobile/drone/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Find object_track by drone ID
+      parameters:
+      - description: drone id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pb.ObjectTrack'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Find object_track by drone ID
+      tags:
+      - object_tracks
+  /object_tracks:
+    get:
+      consumes:
+      - application/json
+      description: Find all object_track
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pb.ObjectTrack'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Find all object_track
+      tags:
+      - object_tracks
+  /object_tracks/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Find object_track by ID
+      parameters:
+      - description: object_track id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pb.ObjectTrack'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Find object_track by ID
+      tags:
+      - object_tracks
+  /track_historys:
+    get:
+      consumes:
+      - application/json
+      description: Find all track_history
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/util.TrackHistoryByteAndJson'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Find all track_history
+      tags:
+      - track_historys
+    post:
+      consumes:
+      - application/json
+      description: Create a new track_history
+      parameters:
+      - description: track_history body
+        in: body
+        name: track_history
+        required: true
+        schema:
+          $ref: '#/definitions/pb.TrackHistory'
+      - description: event api call flag
+        in: query
+        name: eventAPI
+        required: true
+        type: boolean
+      - description: event api call flag
+        in: query
+        name: lat
+        required: true
+        type: number
+      - description: event api call flag
+        in: query
+        name: lon
+        required: true
+        type: number
+      - description: event api call flag
+        in: query
+        name: alt
+        required: true
+        type: number
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/util.TrackHistoryByteAndJson'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Create  track_history
+      tags:
+      - track_historys
+  /track_historys/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete track_history by ID
+      parameters:
+      - description: track_history id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: event api call flag
+        in: query
+        name: eventAPI
+        required: true
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/util.TrackHistoryByteAndJson'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Delete track_history by ID
+      tags:
+      - track_historys
+    get:
+      consumes:
+      - application/json
+      description: Find track_history by ID
+      parameters:
+      - description: drone id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/util.TrackHistoryByteAndJson'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Find track_history by ID
+      tags:
+      - track_historys
+    patch:
+      consumes:
+      - application/json
+      description: Patch track_history by ID use standard of JSON PATCH https://jsonpatch.com/
+      parameters:
+      - description: track_history id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Patch operation format Array of Operation Add, Remove, Replace,
+          Copy, Move, Test. Get example at https://jsonpatch.com/
+        in: body
+        name: drone
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/jsonpatch.Operation'
+          type: array
+      - description: event api call flag
+        in: query
+        name: eventAPI
+        required: true
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pb.PatchResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Patch track_history by ID
+      tags:
+      - track_historys
+    put:
+      consumes:
+      - application/json
+      description: Update track_history by ID
+      parameters:
+      - description: track_history id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: track_history body
+        in: body
+        name: track_history
+        required: true
+        schema:
+          $ref: '#/definitions/pb.TrackHistory'
+      - description: event api call flag
+        in: query
+        name: eventAPI
+        required: true
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/util.TrackHistoryByteAndJson'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Update track_history by ID
+      tags:
+      - track_historys
+  /track_historys/search:
+    get:
+      consumes:
+      - application/json
+      description: Search track_history use Query option https://github.com/jtlabsio/mongo/
+      parameters:
+      - description: page number
+        in: query
+        name: page[page]
+        required: true
+        type: integer
+      - description: page size
+        in: query
+        name: page[size]
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/util.TrackHistoryByteAndJson'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Search track_history
+      tags:
+      - track_historys
+swagger: "2.0"

@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package com.vht.bms.messages;
+
+import "google/protobuf/any.proto";
+// import "pkg/ipc/TrackMessage.proto";
+
+
+option java_package = "com.vht.bms.messages.track";
+option java_outer_classname = "BaseMessageProto";
+option go_package = "pkg/pb";
+
+message BaseMessage{
+    int32 message_type = 1;
+    google.protobuf.Any message_detail = 2;
+    string sender_host_id = 3;
+    int32 sender_service_id = 4;
+    // optional SourceType source_type = 2;// Refer to SourceType in TrackInfoEnum.proto
+}
+
+enum MessageType {
+    MT_UNKNOWN = 0;
+    MT_TRACK_MESSAGE = 1;
+    MT_REMOVED_TRACK_EVENT_MESSAGE = 3;
+    MT_TRACK_STATISTIC_MESSAGE =5;
+}
