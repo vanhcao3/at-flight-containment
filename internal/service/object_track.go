@@ -193,14 +193,37 @@ func (ms *MainService) CheckFlightContainmentAll(ctx context.Context) error {
 			infringedTracks[track.ObjectTrackID] = track
 		}
 	}
-	if len(infringedTracks) == 0 {
+	newInfringements := ms.filterNewInfringements(infringedTracks)
+	if len(newInfringements) == 0 {
 		return nil
 	}
-	if err := ms.Notifier().Publish(EventFlightContainmentInfringement, infringedTracks); err != nil {
+	if err := ms.Notifier().Publish(EventFlightContainmentInfringement, newInfringements); err != nil {
 		config.PrintErrorLog(ctx, err, "Failed to publish flight containment notification")
 		return err
 	}
 	return nil
+}
+
+func (ms *MainService) filterNewInfringements(current map[int32]*pb.ObjectTrack) map[int32]*pb.ObjectTrack {
+	ms.infringedMu.Lock()
+	defer ms.infringedMu.Unlock()
+
+	for id := range ms.notifiedTracks {
+		if _, stillInfringing := current[id]; !stillInfringing {
+			delete(ms.notifiedTracks, id)
+		}
+	}
+
+	newOnes := make(map[int32]*pb.ObjectTrack)
+	for id, track := range current {
+		if _, alreadyNotified := ms.notifiedTracks[id]; alreadyNotified {
+			continue
+		}
+		ms.notifiedTracks[id] = struct{}{}
+		newOnes[id] = track
+	}
+
+	return newOnes
 }
 
 func (ms *MainService) StartFlightContainmentMonitor(ctx context.Context, interval time.Duration) {

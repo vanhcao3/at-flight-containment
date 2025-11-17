@@ -4,6 +4,7 @@ import (
 	"context"
 	"reflect"
 	"strings"
+	"sync"
 	"time"
 
 	config "172.21.5.249/air-trans/at-drone/internal/config"
@@ -50,6 +51,8 @@ type MainService struct {
 	scheduler      *gocron.Scheduler
 	NATSConnection *nats.Conn
 	notifier       *Notifier
+	infringedMu    sync.Mutex
+	notifiedTracks map[int32]struct{}
 }
 
 func createIndex(rType reflect.Type, collection *qmgo.Collection) {
@@ -107,6 +110,7 @@ func New(dbClient *qmgo.Client, cfg config.ServiceConfig, gc *gclient.Client, nc
 		scheduler:      gocron.NewScheduler(time.UTC),
 		NATSConnection: nc,
 		notifier:       NewNotifier(),
+		notifiedTracks: make(map[int32]struct{}),
 	}
 }
 
