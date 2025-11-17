@@ -51,6 +51,9 @@ flight_containment:
       lon: 105.535222
       alt: 40
   renotify_seconds: 60
+  lat_deviation_m: 10
+  lon_deviation_m: 10
+  alt_deviation_m: 5
 nats:
   server: "localhost:4222"
 jwt_token_config:

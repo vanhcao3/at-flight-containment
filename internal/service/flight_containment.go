@@ -80,6 +80,45 @@ func distancePointToSegment(P, A, B Vec) float64 {
 	return P.Sub(closest).Norm()
 }
 
+func closestPointOnSegment(P, A, B Vec) Vec {
+	AB := B.Sub(A)
+	AP := P.Sub(A)
+	denom := AB.Dot(AB)
+	if denom == 0 {
+		return A
+	}
+	t := AP.Dot(AB) / denom
+	switch {
+	case t <= 0:
+		return A
+	case t >= 1:
+		return B
+	default:
+		return Vec{
+			A.x + t*AB.x,
+			A.y + t*AB.y,
+			A.z + t*AB.z,
+		}
+	}
+}
+
+func closestPointOnPath(P Vec, path []Vec) (Vec, bool) {
+	if len(path) < 2 {
+		return Vec{}, false
+	}
+	minDist := math.MaxFloat64
+	closest := path[0]
+	for i := 0; i < len(path)-1; i++ {
+		point := closestPointOnSegment(P, path[i], path[i+1])
+		dist := P.Sub(point).Norm()
+		if dist < minDist {
+			minDist = dist
+			closest = point
+		}
+	}
+	return closest, true
+}
+
 func compute3DDeviation(drone Vec, path []Vec) float64 {
 	minDist := math.MaxFloat64
 	for i := 0; i < len(path)-1; i++ {
@@ -96,7 +135,13 @@ func (ms *MainService) CheckFlightContainment(droneLat, droneLon, droneAlt float
 		return false
 	}
 	settings := ms.SvcConfig.FlightContainment
-	if settings.Radius <= 0 || len(settings.Waypoints) < 2 {
+	if len(settings.Waypoints) < 2 {
+		return false
+	}
+	latThreshold := settings.LatDeviationM
+	lonThreshold := settings.LonDeviationM
+	altThreshold := settings.AltDeviationM
+	if latThreshold <= 0 || lonThreshold <= 0 || altThreshold <= 0 {
 		return false
 	}
 	ref := settings.Waypoints[0]
@@ -110,12 +155,22 @@ func (ms *MainService) CheckFlightContainment(droneLat, droneLon, droneAlt float
 	}
 	de, dn, du := latLonAltToENU(droneLat, droneLon, droneAlt, ref.Latitude, ref.Longitude, ref.Altitude)
 	drone := Vec{de, dn, du}
-	dev := compute3DDeviation(drone, path)
-	fmt.Printf("Drone deviation from path centerline: %.3f m\n", dev)
-	if dev > settings.Radius {
-		fmt.Println("WARNING: Drone is OUTSIDE cylindrical flight containment!")
+	closest, ok := closestPointOnPath(drone, path)
+	if !ok {
+		return false
+	}
+	offset := drone.Sub(closest)
+	lonDeviation := math.Abs(offset.x)
+	latDeviation := math.Abs(offset.y)
+	altDeviation := math.Abs(offset.z)
+
+	fmt.Printf("Drone deviation from path centerline (lon: %.3f m, lat: %.3f m, alt: %.3f m)\n", lonDeviation, latDeviation, altDeviation)
+
+	if lonDeviation > lonThreshold || latDeviation > latThreshold || altDeviation > altThreshold {
+		fmt.Println("WARNING: Drone is OUTSIDE cuboid flight containment!")
 		return true
 	}
-	fmt.Println("Drone is inside containment corridor.")
+
+	fmt.Println("Drone is inside containment cuboid.")
 	return false
 }
