@@ -1,8 +1,9 @@
 package config
 
 type FlightContainmentConfig struct {
-	Radius    float64                           `mapstructure:"radius"`
-	Waypoints []FlightContainmentWaypointConfig `mapstructure:"waypoints"`
+	Radius          float64                           `mapstructure:"radius"`
+	Waypoints       []FlightContainmentWaypointConfig `mapstructure:"waypoints"`
+	RenotifySeconds float64                           `mapstructure:"renotify_seconds"`
 }
 
 type FlightContainmentWaypointConfig struct {

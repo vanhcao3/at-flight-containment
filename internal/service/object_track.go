@@ -214,16 +214,37 @@ func (ms *MainService) filterNewInfringements(current map[int32]*pb.ObjectTrack)
 		}
 	}
 
+	renotifyInterval := ms.flightContainmentRenotifyInterval()
+	now := time.Now()
 	newOnes := make(map[int32]*pb.ObjectTrack)
 	for id, track := range current {
-		if _, alreadyNotified := ms.notifiedTracks[id]; alreadyNotified {
+		lastNotified, alreadyNotified := ms.notifiedTracks[id]
+		if !alreadyNotified {
+			ms.notifiedTracks[id] = now
+			newOnes[id] = track
 			continue
 		}
-		ms.notifiedTracks[id] = struct{}{}
-		newOnes[id] = track
+		if renotifyInterval <= 0 {
+			continue
+		}
+		if now.Sub(lastNotified) >= renotifyInterval {
+			ms.notifiedTracks[id] = now
+			newOnes[id] = track
+		}
 	}
 
 	return newOnes
+}
+
+func (ms *MainService) flightContainmentRenotifyInterval() time.Duration {
+	if ms == nil || ms.SvcConfig == nil {
+		return 0
+	}
+	seconds := ms.SvcConfig.FlightContainment.RenotifySeconds
+	if seconds <= 0 {
+		return 0
+	}
+	return time.Duration(seconds * float64(time.Second))
 }
 
 func (ms *MainService) StartFlightContainmentMonitor(ctx context.Context, interval time.Duration) {
