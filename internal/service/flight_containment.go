@@ -130,18 +130,35 @@ func compute3DDeviation(drone Vec, path []Vec) float64 {
 	return minDist
 }
 
+type containmentEvaluation struct {
+	horizontalExceeded  bool
+	verticalExceeded    bool
+	horizontalDeviation float64
+	verticalDeviation   float64
+	offset              Vec
+}
+
 func (ms *MainService) CheckFlightContainment(droneLat, droneLon, droneAlt float64) bool {
-	if ms == nil || ms.SvcConfig == nil {
+	eval, ok := ms.evaluateFlightContainment(droneLat, droneLon, droneAlt)
+	if !ok {
 		return false
+	}
+	return eval.horizontalExceeded || eval.verticalExceeded
+}
+
+func (ms *MainService) evaluateFlightContainment(droneLat, droneLon, droneAlt float64) (containmentEvaluation, bool) {
+	result := containmentEvaluation{}
+	if ms == nil || ms.SvcConfig == nil {
+		return result, false
 	}
 	settings := ms.SvcConfig.FlightContainment
 	if len(settings.Waypoints) < 2 {
-		return false
+		return result, false
 	}
 	altThreshold := settings.AltDeviationM
 	horizontalThreshold := settings.HorizontalDeviationM
 	if horizontalThreshold <= 0 || altThreshold <= 0 {
-		return false
+		return result, false
 	}
 	ref := settings.Waypoints[0]
 	path := make([]Vec, 0, len(settings.Waypoints))
@@ -150,25 +167,24 @@ func (ms *MainService) CheckFlightContainment(droneLat, droneLon, droneAlt float
 		path = append(path, Vec{e, n, u})
 	}
 	if len(path) < 2 {
-		return false
+		return result, false
 	}
 	de, dn, du := latLonAltToENU(droneLat, droneLon, droneAlt, ref.Latitude, ref.Longitude, ref.Altitude)
 	drone := Vec{de, dn, du}
 	closest, ok := closestPointOnPath(drone, path)
 	if !ok {
-		return false
+		return result, false
 	}
 	offset := drone.Sub(closest)
 	horizontalDeviation := math.Hypot(offset.x, offset.y)
-	altDeviation := math.Abs(offset.z)
+	verticalDeviation := offset.z
+	result.offset = offset
+	result.horizontalDeviation = horizontalDeviation
+	result.verticalDeviation = verticalDeviation
+	result.horizontalExceeded = horizontalDeviation > horizontalThreshold
+	result.verticalExceeded = math.Abs(verticalDeviation) > altThreshold
 
-	fmt.Printf("Drone deviation from path centerline (horizontal: %.3f m, alt: %.3f m)\n", horizontalDeviation, altDeviation)
+	fmt.Printf("Drone deviation from path centerline (horizontal: %.3f m, alt: %.3f m)\n", horizontalDeviation, math.Abs(verticalDeviation))
 
-	if horizontalDeviation > horizontalThreshold || altDeviation > altThreshold {
-		fmt.Println("WARNING: Drone is OUTSIDE flight containment cuboid!")
-		return true
-	}
-
-	fmt.Println("Drone is inside containment cuboid.")
-	return false
+	return result, true
 }
