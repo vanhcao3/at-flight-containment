@@ -176,13 +176,18 @@ func (ms *MainService) FindObjectTrackAll(ctx context.Context) ([]pb.ObjectTrack
 	return rs, err
 }
 
+type FlightContainmentAlert struct {
+	HorizontalDeviation float64 `json:"horizontal_deviation"`
+	AltitudeDeviation   float64 `json:"altitude_deviation"`
+}
+
 func (ms *MainService) CheckFlightContainmentAll(ctx context.Context) error {
 	inMemObjectTracks, err := ms.FindAllInMemObjectTrack(ctx, &emptypb.Empty{})
 	if err != nil {
 		config.PrintErrorLog(ctx, err, "Failed to get all in_mem object tracks")
 		return err
 	}
-	infringedMessages := make(map[int32]string)
+	infringed := make(map[int32]FlightContainmentAlert)
 	for _, track := range inMemObjectTracks {
 		if track == nil || track.Position == nil {
 			continue
@@ -192,13 +197,11 @@ func (ms *MainService) CheckFlightContainmentAll(ctx context.Context) error {
 			if track.ObjectTrackID == 0 {
 				continue
 			}
-			msg := buildContainmentMessage(track.ObjectTrackID, eval)
-			if msg != "" {
-				infringedMessages[track.ObjectTrackID] = msg
-			}
+			alert := buildContainmentAlert(eval)
+			infringed[track.ObjectTrackID] = alert
 		}
 	}
-	newInfringements := ms.filterNewInfringements(infringedMessages)
+	newInfringements := ms.filterNewInfringements(infringed)
 	if len(newInfringements) == 0 {
 		return nil
 	}
@@ -209,23 +212,15 @@ func (ms *MainService) CheckFlightContainmentAll(ctx context.Context) error {
 	return nil
 }
 
-func buildContainmentMessage(id int32, eval containmentEvaluation) string {
-	if !eval.horizontalExceeded && !eval.verticalExceeded {
-		return ""
+func buildContainmentAlert(eval containmentEvaluation) FlightContainmentAlert {
+	alert := FlightContainmentAlert{}
+	if eval.horizontalExceeded {
+		alert.HorizontalDeviation = signedHorizontalDeviation(eval.offset)
 	}
-	hVal := signedHorizontalDeviation(eval.offset)
-	vVal := eval.verticalDeviation
-
-	switch {
-	case eval.horizontalExceeded && eval.verticalExceeded:
-		return fmt.Sprintf("Phương tiện bay số hiệu %d lệch đường bay theo phương vị %.3f m và độ cao bay %.3f m", id, hVal, vVal)
-	case eval.horizontalExceeded:
-		return fmt.Sprintf("Phương tiện bay số hiệu %d lệch đường bay theo phương vị %.3f m", id, hVal)
-	case eval.verticalExceeded:
-		return fmt.Sprintf("Phương tiện bay số hiệu %d vi phạm giới hạn độ cao %.3f m", id, vVal)
-	default:
-		return ""
+	if eval.verticalExceeded {
+		alert.AltitudeDeviation = eval.verticalDeviation
 	}
+	return alert
 }
 
 func signedHorizontalDeviation(offset Vec) float64 {
@@ -240,7 +235,7 @@ func signedHorizontalDeviation(offset Vec) float64 {
 	return math.Copysign(magnitude, dominant)
 }
 
-func (ms *MainService) filterNewInfringements(current map[int32]string) map[int32]string {
+func (ms *MainService) filterNewInfringements(current map[int32]FlightContainmentAlert) map[int32]FlightContainmentAlert {
 	ms.infringedMu.Lock()
 	defer ms.infringedMu.Unlock()
 
