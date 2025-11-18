@@ -53,7 +53,12 @@ flight_containment:
     renotify_seconds: 60
     horizontal_deviation_m: 10
     alt_deviation_m: 5
-nats:
+  tactical_conflict:
+    sphere_radius_m: 15
+    warning_distance_m: 80
+    danger_distance_m: 50
+    near_collision_distance_m: 25
+  nats:
   server: "localhost:4222"
 jwt_token_config:
   validate_jwt: false

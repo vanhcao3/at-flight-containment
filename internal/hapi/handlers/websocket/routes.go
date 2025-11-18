@@ -18,6 +18,7 @@ var upgrader = websocket.Upgrader{
 func RegisterRoutes(s *hapi.Server) []*echo.Route {
 	return []*echo.Route{
 		s.Router.Root.GET("/ws/flight-containment", handler(s, service.EventFlightContainmentInfringement)),
+		s.Router.Root.GET("/ws/tactical-conflict", handler(s, service.EventTacticalConflictDetected)),
 	}
 }
 

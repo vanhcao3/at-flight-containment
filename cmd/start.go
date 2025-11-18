@@ -130,6 +130,7 @@ func runServer(args []string) {
 
 	svc := service.New(qmgoClient, cfg, grpcClient, natsClient)
 	svc.StartFlightContainmentMonitor(ctx, time.Second)
+	svc.StartTacticalConflictMonitor(ctx, time.Second)
 
 	errs := make(chan error, 2)
 

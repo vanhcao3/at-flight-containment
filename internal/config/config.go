@@ -15,6 +15,7 @@ type ServiceConfig struct {
 	NATSConfig        NATSConfig              `mapstructure:"nats"`
 	JWTTokenConfig    JWTTokenConfig          `mapstructure:"jwt_token_config"`
 	FlightContainment FlightContainmentConfig `mapstructure:"flight_containment"`
+	TacticalConflict  TacticalConflictConfig  `mapstructure:"tactical_conflict"`
 }
 
 func LoadConfig(path string) (cfg ServiceConfig, err error) {
@@ -120,4 +121,9 @@ func setDefaultValue() {
 	viper.SetDefault("flight_containment.renotify_seconds", 60.0)
 	viper.SetDefault("flight_containment.horizontal_deviation_m", 10.0)
 	viper.SetDefault("flight_containment.alt_deviation_m", 5.0)
+
+	viper.SetDefault("tactical_conflict.sphere_radius_m", 15.0)
+	viper.SetDefault("tactical_conflict.warning_distance_m", 80.0)
+	viper.SetDefault("tactical_conflict.danger_distance_m", 50.0)
+	viper.SetDefault("tactical_conflict.near_collision_distance_m", 25.0)
 }
