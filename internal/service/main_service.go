@@ -53,6 +53,7 @@ type MainService struct {
 	notifier          *Notifier
 	infringedMu       sync.Mutex
 	notifiedTracks    map[int32]time.Time
+	activeContainment map[int32]struct{}
 	tacticalMu        sync.Mutex
 	notifiedConflicts map[conflictKey]time.Time
 }
@@ -113,6 +114,7 @@ func New(dbClient *qmgo.Client, cfg config.ServiceConfig, gc *gclient.Client, nc
 		NATSConnection:    nc,
 		notifier:          NewNotifier(),
 		notifiedTracks:    make(map[int32]time.Time),
+		activeContainment: make(map[int32]struct{}),
 		notifiedConflicts: make(map[conflictKey]time.Time),
 	}
 }

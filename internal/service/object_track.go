@@ -239,20 +239,22 @@ func (ms *MainService) filterNewInfringements(current map[int32]FlightContainmen
 	ms.infringedMu.Lock()
 	defer ms.infringedMu.Unlock()
 
-	for id := range ms.notifiedTracks {
-		if _, stillInfringing := current[id]; !stillInfringing {
+	for id := range ms.activeContainment {
+		if _, still := current[id]; !still {
+			delete(ms.activeContainment, id)
 			delete(ms.notifiedTracks, id)
 		}
 	}
 
 	renotifyInterval := ms.flightContainmentRenotifyInterval()
 	now := time.Now()
-	newOnes := make(map[int32]*pb.ObjectTrack)
-	for id, track := range current {
+	newOnes := make(map[int32]FlightContainmentAlert)
+	for id, alert := range current {
+		ms.activeContainment[id] = struct{}{}
 		lastNotified, alreadyNotified := ms.notifiedTracks[id]
 		if !alreadyNotified {
 			ms.notifiedTracks[id] = now
-			newOnes[id] = track
+			newOnes[id] = alert
 			continue
 		}
 		if renotifyInterval <= 0 {
@@ -260,7 +262,7 @@ func (ms *MainService) filterNewInfringements(current map[int32]FlightContainmen
 		}
 		if now.Sub(lastNotified) >= renotifyInterval {
 			ms.notifiedTracks[id] = now
-			newOnes[id] = track
+			newOnes[id] = alert
 		}
 	}
 
