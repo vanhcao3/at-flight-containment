@@ -45,14 +45,16 @@ func initColl() {
 }
 
 type MainService struct {
-	DbClient       *qmgo.Client
-	gClient        *gclient.Client
-	SvcConfig      *config.ServiceConfig
-	scheduler      *gocron.Scheduler
-	NATSConnection *nats.Conn
-	notifier       *Notifier
-	infringedMu    sync.Mutex
-	notifiedTracks map[int32]time.Time
+	DbClient          *qmgo.Client
+	gClient           *gclient.Client
+	SvcConfig         *config.ServiceConfig
+	scheduler         *gocron.Scheduler
+	NATSConnection    *nats.Conn
+	notifier          *Notifier
+	infringedMu       sync.Mutex
+	notifiedTracks    map[int32]time.Time
+	tacticalMu        sync.Mutex
+	notifiedConflicts map[conflictKey]time.Time
 }
 
 func createIndex(rType reflect.Type, collection *qmgo.Collection) {
@@ -104,13 +106,14 @@ func New(dbClient *qmgo.Client, cfg config.ServiceConfig, gc *gclient.Client, nc
 	initColl()
 
 	return &MainService{
-		DbClient:       dbClient,
-		gClient:        gc,
-		SvcConfig:      &cfg,
-		scheduler:      gocron.NewScheduler(time.UTC),
-		NATSConnection: nc,
-		notifier:       NewNotifier(),
-		notifiedTracks: make(map[int32]time.Time),
+		DbClient:          dbClient,
+		gClient:           gc,
+		SvcConfig:         &cfg,
+		scheduler:         gocron.NewScheduler(time.UTC),
+		NATSConnection:    nc,
+		notifier:          NewNotifier(),
+		notifiedTracks:    make(map[int32]time.Time),
+		notifiedConflicts: make(map[conflictKey]time.Time),
 	}
 }
 

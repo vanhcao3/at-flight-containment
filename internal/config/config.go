@@ -126,4 +126,5 @@ func setDefaultValue() {
 	viper.SetDefault("tactical_conflict.warning_distance_m", 80.0)
 	viper.SetDefault("tactical_conflict.danger_distance_m", 50.0)
 	viper.SetDefault("tactical_conflict.near_collision_distance_m", 25.0)
+	viper.SetDefault("tactical_conflict.renotify_seconds", 30.0)
 }

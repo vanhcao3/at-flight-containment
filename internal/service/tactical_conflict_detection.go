@@ -26,6 +26,11 @@ type TacticalConflictNotification struct {
 	SeparationMeters float64               `json:"separation_meters"`
 }
 
+type conflictKey struct {
+	a int32
+	b int32
+}
+
 func (ms *MainService) StartTacticalConflictMonitor(ctx context.Context, interval time.Duration) {
 	if interval <= 0 {
 		interval = time.Second
@@ -51,10 +56,11 @@ func (ms *MainService) detectAndNotifyTacticalConflicts(ctx context.Context) err
 	if err != nil {
 		return err
 	}
-	if len(conflicts) == 0 {
+	filtered := ms.filterTacticalConflicts(conflicts)
+	if len(filtered) == 0 {
 		return nil
 	}
-	return ms.Notifier().Publish(EventTacticalConflictDetected, conflicts)
+	return ms.Notifier().Publish(EventTacticalConflictDetected, filtered)
 }
 
 func (ms *MainService) detectTacticalConflicts(ctx context.Context) ([]TacticalConflictNotification, error) {
@@ -124,6 +130,51 @@ func (ms *MainService) detectTacticalConflicts(ctx context.Context) ([]TacticalC
 	}
 
 	return conflicts, nil
+}
+
+func (ms *MainService) filterTacticalConflicts(conflicts []TacticalConflictNotification) []TacticalConflictNotification {
+	ms.tacticalMu.Lock()
+	defer ms.tacticalMu.Unlock()
+
+	interval := ms.tacticalRenotifyInterval()
+	now := time.Now()
+	filtered := make([]TacticalConflictNotification, 0, len(conflicts))
+
+	for _, c := range conflicts {
+		key := conflictKey{a: minInt32(c.TrackAID, c.TrackBID), b: maxInt32(c.TrackAID, c.TrackBID)}
+		last, ok := ms.notifiedConflicts[key]
+		if !ok || interval <= 0 || now.Sub(last) >= interval {
+			ms.notifiedConflicts[key] = now
+			filtered = append(filtered, c)
+		}
+	}
+
+	return filtered
+}
+
+func (ms *MainService) tacticalRenotifyInterval() time.Duration {
+	if ms == nil || ms.SvcConfig == nil {
+		return 0
+	}
+	sec := ms.SvcConfig.TacticalConflict.RenotifySeconds
+	if sec <= 0 {
+		return 0
+	}
+	return time.Duration(sec * float64(time.Second))
+}
+
+func minInt32(a, b int32) int32 {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func maxInt32(a, b int32) int32 {
+	if a > b {
+		return a
+	}
+	return b
 }
 
 func determineTacticalConflictLevel(distance float64, cfg config.TacticalConflictConfig) (TacticalConflictLevel, bool) {
