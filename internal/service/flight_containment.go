@@ -51,13 +51,31 @@ type Vec struct {
 	x, y, z float64
 }
 
-func (a Vec) Sub(b Vec) Vec { return Vec{a.x - b.x, a.y - b.y, a.z - b.z} }
+func (a Vec) Add(b Vec) Vec     { return Vec{a.x + b.x, a.y + b.y, a.z + b.z} }
+func (a Vec) Sub(b Vec) Vec     { return Vec{a.x - b.x, a.y - b.y, a.z - b.z} }
+func (a Vec) Mul(s float64) Vec { return Vec{a.x * s, a.y * s, a.z * s} }
 func (a Vec) Dot(b Vec) float64 {
 	return a.x*b.x + a.y*b.y + a.z*b.z
 }
 
 func (a Vec) Norm() float64 {
 	return math.Sqrt(a.Dot(a))
+}
+
+func (a Vec) Normalize() Vec {
+	n := a.Norm()
+	if n == 0 {
+		return Vec{}
+	}
+	return a.Mul(1 / n)
+}
+
+func (a Vec) Cross(b Vec) Vec {
+	return Vec{
+		x: a.y*b.z - a.z*b.y,
+		y: a.z*b.x - a.x*b.z,
+		z: a.x*b.y - a.y*b.x,
+	}
 }
 
 func distancePointToSegment(P, A, B Vec) float64 {
@@ -102,32 +120,23 @@ func closestPointOnSegment(P, A, B Vec) Vec {
 	}
 }
 
-func closestPointOnPath(P Vec, path []Vec) (Vec, bool) {
+func closestPointOnPath(P Vec, path []Vec) (Vec, int, bool) {
 	if len(path) < 2 {
-		return Vec{}, false
+		return Vec{}, -1, false
 	}
 	minDist := math.MaxFloat64
 	closest := path[0]
+	segment := -1
 	for i := 0; i < len(path)-1; i++ {
 		point := closestPointOnSegment(P, path[i], path[i+1])
 		dist := P.Sub(point).Norm()
 		if dist < minDist {
 			minDist = dist
 			closest = point
+			segment = i
 		}
 	}
-	return closest, true
-}
-
-func compute3DDeviation(drone Vec, path []Vec) float64 {
-	minDist := math.MaxFloat64
-	for i := 0; i < len(path)-1; i++ {
-		d := distancePointToSegment(drone, path[i], path[i+1])
-		if d < minDist {
-			minDist = d
-		}
-	}
-	return minDist
+	return closest, segment, true
 }
 
 type containmentEvaluation struct {
@@ -135,7 +144,6 @@ type containmentEvaluation struct {
 	verticalExceeded    bool
 	horizontalDeviation float64
 	verticalDeviation   float64
-	offset              Vec
 }
 
 func (ms *MainService) CheckFlightContainment(droneLat, droneLon, droneAlt float64) bool {
@@ -160,31 +168,49 @@ func (ms *MainService) evaluateFlightContainment(droneLat, droneLon, droneAlt fl
 	if horizontalThreshold <= 0 || altThreshold <= 0 {
 		return result, false
 	}
-	ref := settings.Waypoints[0]
 	path := make([]Vec, 0, len(settings.Waypoints))
 	for _, w := range settings.Waypoints {
-		e, n, u := latLonAltToENU(w.Latitude, w.Longitude, w.Altitude, ref.Latitude, ref.Longitude, ref.Altitude)
-		path = append(path, Vec{e, n, u})
+		x, y, z := latLonToECEF(w.Latitude, w.Longitude, w.Altitude)
+		path = append(path, Vec{x, y, z})
 	}
 	if len(path) < 2 {
 		return result, false
 	}
-	de, dn, du := latLonAltToENU(droneLat, droneLon, droneAlt, ref.Latitude, ref.Longitude, ref.Altitude)
-	drone := Vec{de, dn, du}
-	closest, ok := closestPointOnPath(drone, path)
+	dx, dy, dz := latLonToECEF(droneLat, droneLon, droneAlt)
+	drone := Vec{dx, dy, dz}
+	closest, segIdx, ok := closestPointOnPath(drone, path)
 	if !ok {
 		return result, false
 	}
 	offset := drone.Sub(closest)
-	horizontalDeviation := math.Hypot(offset.x, offset.y)
-	verticalDeviation := offset.z
-	result.offset = offset
-	result.horizontalDeviation = horizontalDeviation
-	result.verticalDeviation = verticalDeviation
-	result.horizontalExceeded = horizontalDeviation > horizontalThreshold
-	result.verticalExceeded = math.Abs(verticalDeviation) > altThreshold
+	up := closest.Normalize()
+	vertical := offset.Dot(up)
+	horizontalVec := offset.Sub(up.Mul(vertical))
+	horizontalMag := horizontalVec.Norm()
 
-	fmt.Printf("Drone deviation from path centerline (horizontal: %.3f m, alt: %.3f m)\n", horizontalDeviation, math.Abs(verticalDeviation))
+	var signedHorizontal float64
+	if horizontalMag > 0 && segIdx >= 0 {
+		segmentDir := path[segIdx+1].Sub(path[segIdx]).Normalize()
+		right := segmentDir.Cross(up).Normalize()
+		if right.Norm() == 0 {
+			signedHorizontal = horizontalMag
+		} else {
+			if horizontalVec.Dot(right) >= 0 {
+				signedHorizontal = horizontalMag
+			} else {
+				signedHorizontal = -horizontalMag
+			}
+		}
+	} else {
+		signedHorizontal = 0
+	}
+
+	result.horizontalDeviation = signedHorizontal
+	result.verticalDeviation = vertical
+	result.horizontalExceeded = math.Abs(signedHorizontal) > horizontalThreshold
+	result.verticalExceeded = math.Abs(vertical) > altThreshold
+
+	fmt.Printf("Drone deviation from path centerline (horizontal: %.3f m, alt: %.3f m)\n", math.Abs(signedHorizontal), math.Abs(vertical))
 
 	return result, true
 }

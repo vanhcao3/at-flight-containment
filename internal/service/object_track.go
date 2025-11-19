@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"math"
 	"time"
 
 	config "172.21.5.249/air-trans/at-drone/internal/config"
@@ -215,24 +214,12 @@ func (ms *MainService) CheckFlightContainmentAll(ctx context.Context) error {
 func buildContainmentAlert(eval containmentEvaluation) FlightContainmentAlert {
 	alert := FlightContainmentAlert{}
 	if eval.horizontalExceeded {
-		alert.HorizontalDeviation = signedHorizontalDeviation(eval.offset)
+		alert.HorizontalDeviation = eval.horizontalDeviation
 	}
 	if eval.verticalExceeded {
 		alert.AltitudeDeviation = eval.verticalDeviation
 	}
 	return alert
-}
-
-func signedHorizontalDeviation(offset Vec) float64 {
-	magnitude := math.Hypot(offset.x, offset.y)
-	if magnitude == 0 {
-		return 0
-	}
-	dominant := offset.x
-	if math.Abs(offset.y) > math.Abs(offset.x) {
-		dominant = offset.y
-	}
-	return math.Copysign(magnitude, dominant)
 }
 
 func (ms *MainService) filterNewInfringements(current map[int32]FlightContainmentAlert) map[int32]FlightContainmentAlert {
