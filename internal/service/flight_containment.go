@@ -168,38 +168,39 @@ func (ms *MainService) evaluateFlightContainment(droneLat, droneLon, droneAlt fl
 	if horizontalThreshold <= 0 || altThreshold <= 0 {
 		return result, false
 	}
+	ref := settings.Waypoints[0]
 	path := make([]Vec, 0, len(settings.Waypoints))
 	for _, w := range settings.Waypoints {
-		x, y, z := latLonToECEF(w.Latitude, w.Longitude, w.Altitude)
-		path = append(path, Vec{x, y, z})
+		e, n, u := latLonAltToENU(w.Latitude, w.Longitude, w.Altitude, ref.Latitude, ref.Longitude, ref.Altitude)
+		path = append(path, Vec{e, n, u})
 	}
 	if len(path) < 2 {
 		return result, false
 	}
-	dx, dy, dz := latLonToECEF(droneLat, droneLon, droneAlt)
-	drone := Vec{dx, dy, dz}
+
+	de, dn, du := latLonAltToENU(droneLat, droneLon, droneAlt, ref.Latitude, ref.Longitude, ref.Altitude)
+	drone := Vec{de, dn, du}
+
 	closest, segIdx, ok := closestPointOnPath(drone, path)
 	if !ok {
 		return result, false
 	}
 	offset := drone.Sub(closest)
-	up := closest.Normalize()
-	vertical := offset.Dot(up)
-	horizontalVec := offset.Sub(up.Mul(vertical))
-	horizontalMag := horizontalVec.Norm()
+	vertical := offset.z
+	horizontalVec := Vec{x: offset.x, y: offset.y, z: 0}
+	horizontalMag := math.Hypot(horizontalVec.x, horizontalVec.y)
 
 	var signedHorizontal float64
 	if horizontalMag > 0 && segIdx >= 0 {
 		segmentDir := path[segIdx+1].Sub(path[segIdx]).Normalize()
-		right := segmentDir.Cross(up).Normalize()
+		forward := Vec{x: segmentDir.x, y: segmentDir.y, z: 0}.Normalize()
+		right := forward.Cross(Vec{0, 0, 1}).Normalize()
 		if right.Norm() == 0 {
 			signedHorizontal = horizontalMag
+		} else if horizontalVec.Dot(right) >= 0 {
+			signedHorizontal = horizontalMag
 		} else {
-			if horizontalVec.Dot(right) >= 0 {
-				signedHorizontal = horizontalMag
-			} else {
-				signedHorizontal = -horizontalMag
-			}
+			signedHorizontal = -horizontalMag
 		}
 	} else {
 		signedHorizontal = 0
