@@ -6,14 +6,16 @@ import (
 )
 
 type ServiceConfig struct {
-	DbConfig       MongoConfig    `mapstructure:"mongo"`
-	GrpcConfig     GrpcConfig     `mapstructure:"grpc"`
-	HttpConfig     HttpConfig     `mapstructure:"http"`
-	LoggerConfig   LoggerConfig   `mapstructure:"logger"`
-	RabbitmqConfig RabbitMQConfig `mapstructure:"rabbitmq"`
-	OtherConfig    OtherConfig    `mapstructure:"other"`
-	NATSConfig     NATSConfig     `mapstructure:"nats"`
-	JWTTokenConfig JWTTokenConfig `mapstructure:"jwt_token_config"`
+	DbConfig          MongoConfig             `mapstructure:"mongo"`
+	GrpcConfig        GrpcConfig              `mapstructure:"grpc"`
+	HttpConfig        HttpConfig              `mapstructure:"http"`
+	LoggerConfig      LoggerConfig            `mapstructure:"logger"`
+	RabbitmqConfig    RabbitMQConfig          `mapstructure:"rabbitmq"`
+	OtherConfig       OtherConfig             `mapstructure:"other"`
+	NATSConfig        NATSConfig              `mapstructure:"nats"`
+	JWTTokenConfig    JWTTokenConfig          `mapstructure:"jwt_token_config"`
+	FlightContainment FlightContainmentConfig `mapstructure:"flight_containment"`
+	TacticalConflict  TacticalConflictConfig  `mapstructure:"tactical_conflict"`
 }
 
 func LoadConfig(path string) (cfg ServiceConfig, err error) {
@@ -108,4 +110,21 @@ func setDefaultValue() {
 	viper.SetDefault("other.bundle_dir_abs", "web/i18n")
 	viper.SetDefault("other.tracing_host", "localhost")
 	viper.SetDefault("other.tracing_port", 9411)
+
+	viper.SetDefault("flight_containment.radius", 5.0)
+	viper.SetDefault("flight_containment.waypoints", []map[string]float64{
+		{"lat": 21.002694, "lon": 105.537611, "alt": 40},
+		{"lat": 21.001444, "lon": 105.538111, "alt": 40},
+		{"lat": 21.0005, "lon": 105.535889, "alt": 40},
+		{"lat": 21.001944, "lon": 105.535222, "alt": 40},
+	})
+	viper.SetDefault("flight_containment.renotify_seconds", 60.0)
+	viper.SetDefault("flight_containment.horizontal_deviation_m", 10.0)
+	viper.SetDefault("flight_containment.alt_deviation_m", 5.0)
+
+	viper.SetDefault("tactical_conflict.sphere_radius_m", 15.0)
+	viper.SetDefault("tactical_conflict.warning_distance_m", 80.0)
+	viper.SetDefault("tactical_conflict.danger_distance_m", 50.0)
+	viper.SetDefault("tactical_conflict.near_collision_distance_m", 25.0)
+	viper.SetDefault("tactical_conflict.renotify_seconds", 30.0)
 }

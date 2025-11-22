@@ -9,6 +9,7 @@ type NotificationEvent string
 
 const (
 	EventFlightContainmentInfringement NotificationEvent = "flight_containment.infringed"
+	EventTacticalConflictDetected     NotificationEvent = "tactical_conflict.detected"
 )
 
 type eventMessage struct {

@@ -175,20 +175,116 @@ func (ms *MainService) FindObjectTrackAll(ctx context.Context) ([]pb.ObjectTrack
 	return rs, err
 }
 
+type FlightContainmentAlert struct {
+	HorizontalDeviation float64 `json:"horizontal_deviation"`
+	AltitudeDeviation   float64 `json:"altitude_deviation"`
+}
+
 func (ms *MainService) CheckFlightContainmentAll(ctx context.Context) error {
 	inMemObjectTracks, err := ms.FindAllInMemObjectTrack(ctx, &emptypb.Empty{})
 	if err != nil {
 		config.PrintErrorLog(ctx, err, "Failed to get all in_mem object tracks")
 		return err
 	}
-	//Continously check flight containment, if find an infringment, .e.g. CheckFlightContainment return true, then Publish the track to websocket with event EventFlightContainmentInfringement NotificationEvent = "flight_containment.infringed"
-	for _, v := range inMemObjectTracks {
-		ms.CheckFlightContainment(float64(v.Position.Latitude), float64(v.Position.Longitude), float64(v.Position.Altitude))
-		//...
-		ms.Notifier().Publish()
+	infringed := make(map[int32]FlightContainmentAlert)
+	for _, track := range inMemObjectTracks {
+		if track == nil || track.Position == nil {
+			continue
+		}
+		eval, ok := ms.evaluateFlightContainment(float64(track.Position.Latitude), float64(track.Position.Longitude), float64(track.Position.Altitude))
+		if ok && (eval.horizontalExceeded || eval.verticalExceeded) {
+			if track.ObjectTrackID == 0 {
+				continue
+			}
+			alert := buildContainmentAlert(eval)
+			infringed[track.ObjectTrackID] = alert
+		}
+	}
+	newInfringements := ms.filterNewInfringements(infringed)
+	if len(newInfringements) == 0 {
+		return nil
+	}
+	if err := ms.Notifier().Publish(EventFlightContainmentInfringement, newInfringements); err != nil {
+		config.PrintErrorLog(ctx, err, "Failed to publish flight containment notification")
+		return err
+	}
+	return nil
+}
+
+func buildContainmentAlert(eval containmentEvaluation) FlightContainmentAlert {
+	alert := FlightContainmentAlert{}
+	if eval.horizontalExceeded {
+		alert.HorizontalDeviation = eval.horizontalDeviation
+	}
+	if eval.verticalExceeded {
+		alert.AltitudeDeviation = eval.verticalDeviation
+	}
+	return alert
+}
+
+func (ms *MainService) filterNewInfringements(current map[int32]FlightContainmentAlert) map[int32]FlightContainmentAlert {
+	ms.infringedMu.Lock()
+	defer ms.infringedMu.Unlock()
+
+	for id := range ms.activeContainment {
+		if _, still := current[id]; !still {
+			delete(ms.activeContainment, id)
+			delete(ms.notifiedTracks, id)
+		}
 	}
 
-	return err
+	renotifyInterval := ms.flightContainmentRenotifyInterval()
+	now := time.Now()
+	newOnes := make(map[int32]FlightContainmentAlert)
+	for id, alert := range current {
+		ms.activeContainment[id] = struct{}{}
+		lastNotified, alreadyNotified := ms.notifiedTracks[id]
+		if !alreadyNotified {
+			ms.notifiedTracks[id] = now
+			newOnes[id] = alert
+			continue
+		}
+		if renotifyInterval <= 0 {
+			continue
+		}
+		if now.Sub(lastNotified) >= renotifyInterval {
+			ms.notifiedTracks[id] = now
+			newOnes[id] = alert
+		}
+	}
+
+	return newOnes
+}
+
+func (ms *MainService) flightContainmentRenotifyInterval() time.Duration {
+	if ms == nil || ms.SvcConfig == nil {
+		return 0
+	}
+	seconds := ms.SvcConfig.FlightContainment.RenotifySeconds
+	if seconds <= 0 {
+		return 0
+	}
+	return time.Duration(seconds * float64(time.Second))
+}
+
+func (ms *MainService) StartFlightContainmentMonitor(ctx context.Context, interval time.Duration) {
+	if interval <= 0 {
+		interval = time.Second
+	}
+	go func() {
+		ticker := time.NewTicker(interval)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+				if err := ms.CheckFlightContainmentAll(ctx); err != nil && ctx.Err() == nil {
+					config.PrintErrorLog(ctx, err, "Flight containment monitor failed")
+				}
+			}
+		}
+	}()
 }
 
 type MobileDroneResponse struct {

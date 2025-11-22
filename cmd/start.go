@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	config "172.21.5.249/air-trans/at-drone/internal/config"
 	gapi "172.21.5.249/air-trans/at-drone/internal/gapi"
@@ -39,7 +40,9 @@ func init() {
 }
 
 func runServer(args []string) {
-	ctx := log.Logger.WithContext(context.Background())
+	baseCtx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	ctx := log.Logger.WithContext(baseCtx)
 
 	/**
 	* Load config file
@@ -126,6 +129,8 @@ func runServer(args []string) {
 	grpcClient := gclient.New(cfg.GrpcConfig.GrpcChannels)
 
 	svc := service.New(qmgoClient, cfg, grpcClient, natsClient)
+	svc.StartFlightContainmentMonitor(ctx, time.Second)
+	svc.StartTacticalConflictMonitor(ctx, time.Second)
 
 	errs := make(chan error, 2)
 
